@@ -32,47 +32,6 @@ function showOnly(id){
     selected.classList.remove('hidden');
 }
 
-
-function updateStatus(btn, text, removeClass, addClasses) {
-  const card = btn.closest('.job-card');
-  const apply = card.querySelector('.apply-btn');
-
-  const prevState = apply.innerText;
-  if(prevState == text) return null;
-  apply.innerText = text;
-
-  if (removeClass) apply.classList.remove(removeClass);
-
-  if (addClasses) {
-    apply.classList.add(...addClasses);
-  }
-  return prevState;
-}
-
-function changeCount(id, value){
-  const el = document.getElementById(id);
-  let count = parseInt(el.innerText);
-  el.innerText = count + value;
-}
-
-
-
-function clearEmpty(containerId) {
-  const container = document.getElementById(containerId);
-  const empty = container.querySelector('.empty-state');
-
-  if (empty) {
-    empty.remove();
-  }
-}
-
-
-function removeClass(id,className){
-  const getId = document.getElementbyId(id);
-  getId.classList.remove(className);
-}
-
-
 const buttons = document.querySelectorAll(".tab-btn");
 function setActive(btn) {
   buttons.forEach((b) => {
@@ -82,4 +41,23 @@ function setActive(btn) {
 
   btn.classList.remove("btn-outline", "bg-white", "text-gray-500");
   btn.classList.add("btn-primary", "bg-blue-500", "text-white");
+}
+
+
+function updateJobCount(type) {
+    const jobCount = document.getElementById('job-count');
+
+    const totalJobs = document.querySelectorAll('.job-card').length;
+    const interviewCount = parseInt(document.getElementById('total-interview').innerText);
+    const rejectedCount = parseInt(document.getElementById('total-rejected').innerText);
+
+    if (type === 'all') {
+        jobCount.innerText = `${totalJobs}`;
+    }
+    else if (type === 'interview') {
+        jobCount.innerText = `${interviewCount} of ${totalJobs}`;
+    }
+    else if (type === 'reject') {
+        jobCount.innerText = `${rejectedCount} of ${totalJobs}`;
+    }
 }
