@@ -47,7 +47,7 @@ function setActive(btn) {
 function updateJobCount(type) {
     const jobCount = document.getElementById('job-count');
 
-    const totalJobs = document.querySelectorAll('.job-card').length;
+    const totalJobs = document.querySelectorAll('#job-container .job-card').length;
     const interviewCount = parseInt(document.getElementById('total-interview').innerText);
     const rejectedCount = parseInt(document.getElementById('total-rejected').innerText);
 
@@ -59,5 +59,27 @@ function updateJobCount(type) {
     }
     else if (type === 'reject') {
         jobCount.innerText = `${rejectedCount} of ${totalJobs}`;
+    }
+}
+
+function updateEmptyStates() {
+    const interviewCards = document.getElementById('interview-cards');
+    const interviewEmpty = document.getElementById('interview-empty');
+    if (interviewCards && interviewEmpty) {
+        if (interviewCards.children.length === 0) {
+            interviewEmpty.classList.remove('hidden');
+        } else {
+            interviewEmpty.classList.add('hidden');
+        }
+    }
+
+    const rejectCards = document.getElementById('reject-cards');
+    const rejectEmpty = document.getElementById('reject-empty');
+    if (rejectCards && rejectEmpty) {
+        if (rejectCards.children.length === 0) {
+            rejectEmpty.classList.remove('hidden');
+        } else {
+            rejectEmpty.classList.add('hidden');
+        }
     }
 }

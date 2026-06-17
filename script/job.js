@@ -11,7 +11,7 @@ document.querySelectorAll('.dlt-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         btn.closest('.job-card').remove();
 
-        const count = document.querySelectorAll('.job-card').length;
+        const count = document.querySelectorAll('#job-container .job-card').length;
         document.getElementById('total-job').innerText = count;
         document.getElementById('job-count').innerText = count;
         if (count < 1) {
@@ -29,153 +29,87 @@ document.getElementById('all-job').addEventListener("click", () => {
 });
 
 
-document.getElementById('job-container').addEventListener('click', function (e) {
-
-    const card = e.target.closest('.job-card');
-
-    if (!card) return;
-    const clone = card.cloneNode(true);
-
-    // 🔥 EI KHANE likhba
-    clone.querySelector('.interview-btn').disabled = true;
-    // Interview click → COPY
-    if (e.target.classList.contains('interview-btn')) {
-
-        const clone = card.cloneNode(true);
-        document.getElementById('interview-cards').appendChild(clone);
-    }
-
-    // Reject click → COPY
-    if (e.target.classList.contains('reject-btn')) {
-
-        const clone = card.cloneNode(true);
-        document.getElementById('reject-cards').appendChild(clone);
-    }
-
-});
 
 document.getElementById('interview').addEventListener("click", (e) => {
     showOnly('interview-list');
     setActive(e.target);
     updateJobCount('interview');
-
-    const interviewCards = document.getElementById('interview-cards');
-
-    if (interviewCards.children.length === 0) {
-        document.getElementById('interview-empty').classList.remove('hidden');
-    }
-    else {
-        document.getElementById('interview-empty').classList.add('hidden');
-    }
+    updateEmptyStates();
 });
 
 document.getElementById('reject').addEventListener("click", (e) => {
     showOnly('reject-list');
     setActive(e.target);
     updateJobCount('reject');
-
-    const rejectCards = document.getElementById('reject-cards');
-
-    if (rejectCards.children.length === 0) {
-        document.getElementById('reject-empty').classList.remove('hidden');
-    }
-    else {
-        document.getElementById('reject-empty').classList.add('hidden');
-    }
+    updateEmptyStates();
 });
 
-document.querySelectorAll('.interview-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('interview-btn') && !e.target.classList.contains('reject-btn')) return;
 
-        const card = btn.closest('.job-card');
-        const applyBtn = card.querySelector('.apply-btn');
+    const clickedCard = e.target.closest('.job-card');
+    if (!clickedCard) return;
 
-        const totalInterview = document.getElementById('total-interview');
-        const totalRejected = document.getElementById('total-rejected');
-        const acceptReject = document.getElementById('accept-reject');
+    const companyName = clickedCard.querySelector('h3').innerText;
 
-        let interviewCount = parseInt(totalInterview.innerText);
-        let rejectedCount = parseInt(totalRejected.innerText);
+    const originalCards = Array.from(document.querySelectorAll('#job-container .job-card'));
+    const originalCard = originalCards.find(c => c.querySelector('h3').innerText === companyName);
+    
+    if (!originalCard) return;
 
-        if (applyBtn.innerText === 'INTERVIEW') {
-            return;
-        }
+    const applyBtn = originalCard.querySelector('.apply-btn');
+    const currentStatus = applyBtn.innerText;
+    
+    let newStatus = '';
+    if (e.target.classList.contains('interview-btn')) newStatus = 'INTERVIEW';
+    if (e.target.classList.contains('reject-btn')) newStatus = 'REJECTED';
 
+    if (currentStatus === newStatus) return;
 
-        if (applyBtn.innerText === 'REJECTED') {
-            rejectedCount--;
-        }
+    // 2. Update Counters
+    const totalInterview = document.getElementById('total-interview');
+    const totalRejected = document.getElementById('total-rejected');
+    let interviewCount = parseInt(totalInterview.innerText);
+    let rejectedCount = parseInt(totalRejected.innerText);
 
-        interviewCount++;
+    if (currentStatus === 'INTERVIEW') interviewCount--;
+    if (currentStatus === 'REJECTED') rejectedCount--;
 
-        applyBtn.innerText = 'INTERVIEW';
-        applyBtn.classList.remove('btn-error');
+    if (newStatus === 'INTERVIEW') interviewCount++;
+    if (newStatus === 'REJECTED') rejectedCount++;
+
+    totalInterview.innerText = interviewCount;
+    totalRejected.innerText = rejectedCount;
+
+    
+    applyBtn.innerText = newStatus;
+    applyBtn.classList.remove('btn-success', 'btn-error');
+    if (newStatus === 'INTERVIEW') {
         applyBtn.classList.add('btn-soft', 'btn-success');
-        if (applyBtn.innerText == 'INTERVIEW') {
-
-        }
-        totalInterview.innerText = interviewCount;
-        totalRejected.innerText = rejectedCount;
-        // acceptReject.innerText = processedCount + ' of ';
-    });
-});
-
-document.querySelectorAll('.reject-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-
-        const card = btn.closest('.job-card');
-        const applyBtn = card.querySelector('.apply-btn');
-
-        const totalInterview = document.getElementById('total-interview');
-        const totalRejected = document.getElementById('total-rejected');
-        const acceptReject = document.getElementById('accept-reject');
-
-        let interviewCount = parseInt(totalInterview.innerText);
-        let rejectedCount = parseInt(totalRejected.innerText);
-
-        if (applyBtn.innerText === 'REJECTED') {
-            return;
-        }
-
-        if (applyBtn.innerText === 'INTERVIEW') {
-            interviewCount--;
-        }
-
-        rejectedCount++;
-
-        applyBtn.innerText = 'REJECTED';
-        applyBtn.classList.remove('btn-success');
+    } else if (newStatus === 'REJECTED') {
         applyBtn.classList.add('btn-soft', 'btn-error');
+    }
 
-        totalInterview.innerText = interviewCount;
-        totalRejected.innerText = rejectedCount;
+    
+    document.getElementById('interview-cards').querySelectorAll('.job-card').forEach(c => {
+        if (c.querySelector('h3').innerText === companyName) c.remove();
     });
-});
+    document.getElementById('reject-cards').querySelectorAll('.job-card').forEach(c => {
+        if (c.querySelector('h3').innerText === companyName) c.remove();
+    });
 
-
-document.getElementById('interview-cards').addEventListener('click', function (e) {
-
-    const card = e.target.closest('.job-card');
-
-    if (!card) return;
-
-    // Reject click → MOVE to reject
-    if (e.target.classList.contains('reject-btn')) {
-        document.getElementById('reject-cards').appendChild(card);
+   
+    const clone = originalCard.cloneNode(true);
+    if (newStatus === 'INTERVIEW') {
+        clone.querySelector('.interview-btn').disabled = true;
+        clone.querySelector('.reject-btn').disabled = false;
+        document.getElementById('interview-cards').appendChild(clone);
+    } else if (newStatus === 'REJECTED') {
+        clone.querySelector('.reject-btn').disabled = true;
+        clone.querySelector('.interview-btn').disabled = false;
+        document.getElementById('reject-cards').appendChild(clone);
     }
 
-});
-
-
-document.getElementById('reject-cards').addEventListener('click', function (e) {
-
-    const card = e.target.closest('.job-card');
-
-    if (!card) return;
-
-    // Interview click → MOVE to interview
-    if (e.target.classList.contains('interview-btn')) {
-        document.getElementById('interview-cards').appendChild(card);
-    }
-
+    
+    updateEmptyStates();
 });
